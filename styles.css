@@ -1,0 +1,614 @@
+/* Animatable custom props (smooth flip / tilt where supported) */
+@property --flip {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --rotate-x {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --rotate-y {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --card-opacity {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
+/* ─── Tokens ─────────────────────────────────────────────── */
+:root {
+  --bg: #0d0f12;
+  --bg-glow: #1a1608;
+  --text: #f4efe3;
+  --muted: rgba(244, 239, 227, 0.55);
+  --gold: #e5cb62;
+  --gold-soft: #f0dc8a;
+  --orange: #f7931a;
+  --orange-soft: #ffb070;
+  /* Ambient page glow behind the ticket (swapped per mode) */
+  --ticket-ambient: rgba(229, 203, 98, 0.28);
+  --ticket-ambient-soft: rgba(229, 203, 98, 0.1);
+
+  /* Amazing Rare foil (poke-holo #⚓-amazing) */
+  --glitter: url("assets/foils/glitter.png");
+  /* Fixed px: % of a wide ticket makes tiles huge; paper foil is fine-grain */
+  --glittersize: 42px;
+  --foil: url("assets/foils/illusion.png");
+  --foilsize: 90px;
+  --grain: url("assets/foils/grain.webp");
+  --space: 5%;
+  --angle: 133deg;
+
+  /* Sunpillar rainbow (base.css) */
+  --sunpillar-1: hsl(2, 100%, 73%);
+  --sunpillar-2: hsl(53, 100%, 69%);
+  --sunpillar-3: hsl(93, 100%, 69%);
+  --sunpillar-4: hsl(176, 100%, 76%);
+  --sunpillar-5: hsl(228, 100%, 74%);
+  --sunpillar-6: hsl(283, 100%, 73%);
+  --sunpillar-clr-1: var(--sunpillar-1);
+  --sunpillar-clr-2: var(--sunpillar-2);
+  --sunpillar-clr-3: var(--sunpillar-3);
+  --sunpillar-clr-4: var(--sunpillar-4);
+  --sunpillar-clr-5: var(--sunpillar-5);
+  --sunpillar-clr-6: var(--sunpillar-6);
+
+  /* Interaction (driven by JS) */
+  --pointer-x: 50%;
+  --pointer-y: 50%;
+  --pointer-from-center: 0;
+  --pointer-from-top: 0.5;
+  --pointer-from-left: 0.5;
+  --background-x: 50%;
+  --background-y: 50%;
+  --rotate-x: 0deg; /* used as rotateY (horizontal tilt) */
+  --rotate-y: 0deg; /* used as rotateX (vertical tilt) */
+  --card-opacity: 0;
+  --card-scale: 1;
+  --flip: 0deg;
+  --ticket-w: min(92vw, 720px);
+  /* Matches SVG viewBox (waves are baked into the art) */
+  --ticket-aspect: 377 / 147;
+  /*
+    Shine/glare paint on a 3× surface (clipped by the face).
+    Ticket pointer (0–1) maps into the center third so the radial
+    100% edge stays outside the visible ticket — even with 3D tilt.
+  */
+  --glow-x: calc(33.333% + var(--pointer-from-left) * 33.333%);
+  --glow-y: calc(33.333% + var(--pointer-from-top) * 33.333%);
+}
+
+/* ─── Reset / page ───────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "DM Sans", system-ui, sans-serif;
+  color: var(--text);
+  /* Ticket-colored ambient wash + deep base */
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 48%,
+      var(--ticket-ambient) 0%,
+      var(--ticket-ambient-soft) 38%,
+      transparent 68%
+    ),
+    radial-gradient(ellipse 90% 70% at 50% 55%, var(--bg-glow) 0%, transparent 62%),
+    var(--bg);
+  min-height: 100%;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.45s ease;
+}
+
+body[data-ticket-mode="orange"] {
+  --ticket-ambient: rgba(247, 147, 26, 0.32);
+  --ticket-ambient-soft: rgba(247, 147, 26, 0.12);
+  --bg-glow: #1a1008;
+}
+
+.stage {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  padding: clamp(1.5rem, 5vw, 3rem) 1.25rem 2.5rem;
+}
+
+.header {
+  text-align: center;
+  max-width: min(36rem, 92vw);
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.header h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.hint,
+.footer-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.footer-hint {
+  min-height: 1.4em;
+  transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+.footer-hint.is-flipped {
+  color: var(--gold-soft);
+}
+
+/* ─── Mode toggle (golden ↔ orange) ──────────────────────── */
+.mode-bar {
+  display: flex;
+  justify-content: center;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1rem 0.55rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.mode-toggle:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.mode-toggle:active {
+  transform: scale(0.98);
+}
+
+.mode-toggle__swatch {
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  opacity: 0.35;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mode-toggle__swatch--golden {
+  background: linear-gradient(145deg, #f0dc8a, #e5cb62 45%, #b8922a);
+}
+
+.mode-toggle__swatch--orange {
+  background: linear-gradient(145deg, #ffb070, #f07a2a 45%, #c24e12);
+}
+
+/* Active mode swatch pops */
+.mode-toggle[data-mode="golden"] .mode-toggle__swatch--golden,
+.mode-toggle[data-mode="orange"] .mode-toggle__swatch--orange {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+body[data-ticket-mode="orange"] .eyebrow {
+  color: var(--orange);
+}
+
+body[data-ticket-mode="orange"] .mode-toggle:focus-visible {
+  outline-color: var(--orange);
+}
+
+body[data-ticket-mode="orange"] .footer-hint.is-flipped {
+  color: var(--orange-soft);
+}
+
+/* ─── Ticket shell ───────────────────────────────────────── */
+.ticket-stage {
+  perspective: 900px;
+  perspective-origin: 50% 50%;
+  width: var(--ticket-w);
+  max-width: 100%;
+}
+
+.ticket {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--ticket-aspect);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transform-style: preserve-3d;
+  z-index: 1;
+}
+
+.ticket:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 10px;
+  border-radius: 4px;
+}
+
+.ticket__shadow {
+  position: absolute;
+  /* Centered under the ticket (was reading left-heavy) */
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: -10%;
+  width: 78%;
+  height: 42%;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.18) 48%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  transform: translateX(-50%) translateZ(-40px) scale(var(--card-scale));
+  transform-origin: center center;
+  opacity: calc(0.5 + var(--pointer-from-center) * 0.3);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.ticket__translater {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: scale(var(--card-scale));
+  transition: transform 0.15s ease-out;
+  z-index: 1;
+}
+
+.ticket.is-interacting .ticket__translater {
+  transition: none;
+}
+
+.ticket__rotator {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
+  transition: --flip 0.7s cubic-bezier(0.4, 0.05, 0.2, 1);
+  box-shadow: none;
+  will-change: transform;
+}
+
+/* ─── Faces ──────────────────────────────────────────────── */
+.ticket__face {
+  position: absolute;
+  inset: 0;
+  /* Clip expanded shine/glare to the ticket bounds */
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-style: preserve-3d;
+  background: transparent;
+  /* SVG already includes wavy edges — use its alpha as silhouette */
+  -webkit-mask-image: var(--face-art);
+  mask-image: var(--face-art);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+}
+
+.ticket__front {
+  transform: translateZ(1px);
+  --face-art: url("assets/frente.svg");
+  /* Same SVG as art → luminance mask stays perfectly registered */
+  --foil-mask: url("assets/frente.svg");
+}
+
+.ticket__back {
+  transform: rotateY(180deg) translateZ(1px);
+  --face-art: url("assets/verso.svg");
+  --foil-mask: url("assets/verso.svg");
+}
+
+/* Orange variant — masks/art swapped via CSS custom props on faces */
+.ticket[data-mode="orange"] .ticket__front {
+  --face-art: url("assets/orange-frente.svg");
+  --foil-mask: url("assets/orange-frente.svg");
+}
+
+.ticket[data-mode="orange"] .ticket__back {
+  --face-art: url("assets/orange-verso.svg");
+  --foil-mask: url("assets/orange-verso.svg");
+}
+
+.ticket__art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  user-select: none;
+  pointer-events: none;
+  transform: translateZ(0.01px);
+}
+
+/* Soft metallic edge highlight */
+.ticket__edge {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset -1px 0 0 rgba(0, 0, 0, 0.08);
+  mix-blend-mode: soft-light;
+  transform: translateZ(1.5px);
+}
+
+/*
+  Gold-only: luminance of the face SVG (bright foil = shine, dark ink = none).
+  Mask is sized to the center ticket region of the expanded paint layer.
+*/
+.ticket__shine,
+.ticket__glare {
+  -webkit-mask-image: var(--foil-mask);
+  mask-image: var(--foil-mask);
+  /* Center third of the 3× paint surface = ticket art */
+  -webkit-mask-size: 33.333% 33.333%;
+  mask-size: 33.333% 33.333%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-mode: luminance;
+  mask-mode: luminance;
+  -webkit-mask-source-type: luminance;
+}
+
+/*
+  ─── Amazing Rare Holofoil ─────────────────────────────────
+  Adapted from simeydotme/pokemon-cards-css → amazing-rare.css
+  (https://poke-holo.simey.me/#⚓-amazing)
+
+  No visible gradient frame (incl. 3D tilt + corner hover):
+  - paint surface is 3× the ticket; face overflow clips to the card
+  - radial 100% edge sits outside the visible ticket region
+  - farthest-corner + soft stops, no hard mid-ring
+*/
+.ticket__shine {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  pointer-events: none;
+  z-index: 3;
+  transform: translate(-50%, -50%) translateZ(1px);
+  overflow: visible;
+  opacity: var(--card-opacity);
+
+  background-image:
+    var(--glitter),
+    var(--glitter),
+    radial-gradient(
+      farthest-corner ellipse at var(--glow-x) var(--glow-y),
+      hsla(150, 20%, 10%, 1) 0%,
+      hsla(177, 22%, 80%, 0.16) 18%,
+      hsla(0, 0%, 95%, 0.88) 42%,
+      hsla(0, 0%, 95%, 0.72) 70%,
+      hsla(0, 0%, 95%, 0.72) 100%
+    );
+
+  background-size:
+    var(--glittersize) var(--glittersize),
+    var(--glittersize) var(--glittersize),
+    100% 100%;
+  background-position: 0 0, 21px 17px, center center;
+  background-repeat: repeat, repeat, no-repeat;
+  background-blend-mode: soft-light, color-burn;
+  filter: brightness(1) contrast(1) saturate(0.9);
+  mix-blend-mode: color-dodge;
+}
+
+/* Etched foil + warm spotlight */
+.ticket__shine::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  --sunpillar-clr-1: var(--sunpillar-5);
+  --sunpillar-clr-2: var(--sunpillar-6);
+  --sunpillar-clr-3: var(--sunpillar-1);
+  --sunpillar-clr-4: var(--sunpillar-2);
+  --sunpillar-clr-5: var(--sunpillar-3);
+  --sunpillar-clr-6: var(--sunpillar-4);
+
+  background-image:
+    var(--foil),
+    radial-gradient(
+      farthest-corner ellipse at var(--glow-x) var(--glow-y),
+      hsla(50, 20%, 90%, 0.95) 0%,
+      rgba(181, 139, 164, 0.48) 20%,
+      hsla(0, 0%, 0%, 0.4) 48%,
+      hsl(0, 0%, 0%) 72%,
+      hsl(0, 0%, 0%) 100%
+    );
+
+  /* Small repeating foil = etched paper grain on a wide ticket */
+  background-size: var(--foilsize) var(--foilsize), 100% 100%;
+  background-position: center center, center center;
+  background-repeat: repeat, no-repeat;
+  background-blend-mode: color-burn;
+  mix-blend-mode: lighten;
+  filter: brightness(1) contrast(1) saturate(1);
+  opacity: 0.5;
+}
+
+/* Sunpillar rainbow (saturation) */
+.ticket__shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+
+  --sunpillar-clr-1: var(--sunpillar-6);
+  --sunpillar-clr-2: var(--sunpillar-1);
+  --sunpillar-clr-3: var(--sunpillar-2);
+  --sunpillar-clr-4: var(--sunpillar-3);
+  --sunpillar-clr-5: var(--sunpillar-4);
+  --sunpillar-clr-6: var(--sunpillar-5);
+
+  background-image: repeating-linear-gradient(
+    var(--angle),
+    var(--sunpillar-clr-1) calc(var(--space) * 1),
+    var(--sunpillar-clr-2) calc(var(--space) * 2),
+    var(--sunpillar-clr-3) calc(var(--space) * 3),
+    var(--sunpillar-clr-4) calc(var(--space) * 4),
+    var(--sunpillar-clr-5) calc(var(--space) * 5),
+    var(--sunpillar-clr-6) calc(var(--space) * 6),
+    var(--sunpillar-clr-1) calc(var(--space) * 7)
+  );
+
+  /* Extra travel room on a landscape surface so bars don’t hard-stop */
+  background-size: 600% 1000%;
+  background-position:
+    calc(50% + (50% - var(--background-x)) * 3.5)
+    calc(50% + (50% - var(--background-y)) * 2.5);
+  filter: brightness(calc(0.75 - (var(--pointer-from-center) * 0.5))) contrast(1) saturate(1);
+  mix-blend-mode: saturation;
+}
+
+/* Slightly softer on the back (dense text) */
+.ticket__shine--subtle {
+  opacity: calc(var(--card-opacity) * 0.72);
+  filter: brightness(0.95) contrast(1) saturate(0.8);
+}
+
+.ticket__shine--subtle::before {
+  opacity: 0.4;
+}
+
+/* ─── Amazing Rare glare (masked to foil areas) ──────────── */
+.ticket__glare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  pointer-events: none;
+  z-index: 4;
+  transform: translate(-50%, -50%) translateZ(1.4px);
+  opacity: var(--card-opacity);
+
+  background-image: radial-gradient(
+    farthest-corner ellipse at var(--glow-x) var(--glow-y),
+    hsla(50, 20%, 90%, 0.55) 0%,
+    hsla(150, 20%, 30%, 0.32) 22%,
+    hsla(0, 0%, 0%, 0.48) 55%,
+    hsla(0, 0%, 0%, 0.55) 100%
+  );
+
+  filter: brightness(0.9) contrast(1.75);
+  mix-blend-mode: overlay;
+}
+
+.ticket__glare::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* foil mask already on parent .ticket__glare */
+
+  background-image: radial-gradient(
+    farthest-corner ellipse at var(--glow-x) var(--glow-y),
+    hsla(50, 20%, 90%, 0.85) 0%,
+    hsla(150, 20%, 30%, 0.38) 24%,
+    hsla(0, 0%, 0%, 0.15) 52%,
+    transparent 78%,
+    transparent 100%
+  );
+
+  filter: brightness(1) contrast(1.35);
+  mix-blend-mode: overlay;
+  opacity: 1;
+}
+
+/* ─── Idle float (subtle, stops while interacting) ───────── */
+@keyframes idle-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ticket:not(.is-interacting):not(.is-flipping) {
+  animation: idle-float 5.5s ease-in-out infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ticket,
+  .ticket__rotator,
+  .ticket__translater {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile: slightly stronger default opacity when touching */
+@media (hover: none) {
+  .ticket {
+    --card-opacity: 0.55;
+  }
+}

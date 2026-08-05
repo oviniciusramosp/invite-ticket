@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invite Ticket — Holo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="stage">
+      <header class="header">
+        <p class="eyebrow">Coquetel Paradigma</p>
+        <h1>Você é o Paradigmer selecionado!</h1>
+      </header>
+
+      <div class="ticket-stage" id="ticketStage">
+        <div
+          class="ticket"
+          id="ticket"
+          role="button"
+          tabindex="0"
+          aria-label="Ticket holográfico. Clique ou pressione Enter para virar."
+          aria-pressed="false"
+          data-mode="golden"
+        >
+          <div class="ticket__shadow" aria-hidden="true"></div>
+          <div class="ticket__translater">
+            <div class="ticket__rotator">
+              <!-- Frente -->
+              <div class="ticket__face ticket__front">
+                <img
+                  class="ticket__art"
+                  id="artFront"
+                  src="assets/frente.svg?v=4"
+                  alt="Frente do ticket de convite"
+                  draggable="false"
+                  width="377"
+                  height="147"
+                />
+                <div class="ticket__shine" aria-hidden="true"></div>
+                <div class="ticket__glare" aria-hidden="true"></div>
+                <div class="ticket__edge" aria-hidden="true"></div>
+              </div>
+
+              <!-- Verso -->
+              <div class="ticket__face ticket__back">
+                <img
+                  class="ticket__art"
+                  id="artBack"
+                  src="assets/verso.svg?v=4"
+                  alt="Verso do ticket de convite"
+                  draggable="false"
+                  width="377"
+                  height="147"
+                />
+                <div class="ticket__shine ticket__shine--subtle" aria-hidden="true"></div>
+                <div class="ticket__glare" aria-hidden="true"></div>
+                <div class="ticket__edge" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mode-bar" role="group" aria-label="Variante do ticket">
+        <button
+          type="button"
+          class="mode-toggle"
+          id="modeToggle"
+          aria-pressed="false"
+          data-mode="golden"
+        >
+          <span class="mode-toggle__swatch mode-toggle__swatch--golden" aria-hidden="true"></span>
+          <span class="mode-toggle__swatch mode-toggle__swatch--orange" aria-hidden="true"></span>
+          <span class="mode-toggle__label" id="modeToggleLabel">Golden ticket</span>
+        </button>
+      </div>
+
+      <p class="footer-hint" id="flipHint">Clique no ticket para revelar o verso</p>
+    </div>
+
+    <script src="ticket.js"></script>
+  </body>
+</html>
