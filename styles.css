@@ -41,11 +41,11 @@
   --glitter: url("assets/foils/glitter.png");
   /*
     % of the ticket box (same model as pokemon-cards-css).
-    Landscape: slightly smaller % so tiles aren’t huge on the long axis.
+    Desktop: finer grain; mobile bumps these up in the media query below.
   */
-  --glittersize: 14%;
+  --glittersize: 8%;
   --foil: url("assets/foils/geometric.png");
-  --imgsize: 22%;
+  --imgsize: 14%;
   --shift: 1px;
   --grain: url("assets/foils/grain.webp");
   --space: 5%;
