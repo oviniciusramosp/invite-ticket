@@ -4,7 +4,7 @@ Ticket holográfico interativo (golden / orange) com flip 3D e efeito Amazing Ra
 
 ## Demo
 
-Publicado via GitHub Pages após o deploy.
+**https://oviniciusramosp.github.io/invite-ticket/**
 
 ## Local
 
