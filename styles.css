@@ -77,6 +77,9 @@
   --ticket-w: min(92vw, 720px);
   /* Matches SVG viewBox (waves are baked into the art) */
   --ticket-aspect: 377 / 147;
+  --ticket-h: calc(var(--ticket-w) * 147 / 377);
+  /* Perfect circle glow: slightly taller than the ticket height */
+  --ambient-d: calc(var(--ticket-h) * 1.18);
   /*
     Shine/glare paint on a 3× surface (clipped by the face).
     Ticket pointer (0–1) maps into the center third so the radial
@@ -102,14 +105,8 @@ body {
 body {
   font-family: "DM Sans", system-ui, sans-serif;
   color: var(--text);
-  /* Ticket-colored ambient wash + deep base */
+  /* Deep base only — ticket-colored circle lives on .ticket-stage */
   background:
-    radial-gradient(
-      ellipse 70% 55% at 50% 48%,
-      var(--ticket-ambient) 0%,
-      var(--ticket-ambient-soft) 38%,
-      transparent 68%
-    ),
     radial-gradient(ellipse 90% 70% at 50% 55%, var(--bg-glow) 0%, transparent 62%),
     var(--bg);
   min-height: 100%;
@@ -251,10 +248,34 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
 /* ─── Ticket shell ───────────────────────────────────────── */
 .ticket-stage {
+  position: relative;
   perspective: 900px;
   perspective-origin: 50% 50%;
   width: var(--ticket-w);
   max-width: 100%;
+  /* room for the circle that is slightly taller than the ticket */
+  padding-block: calc((var(--ambient-d) - var(--ticket-h)) / 2);
+}
+
+/* Perfect circle glow behind the ticket (not an oval) */
+.ticket-stage::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--ambient-d);
+  height: var(--ambient-d);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    var(--ticket-ambient) 0%,
+    var(--ticket-ambient-soft) 48%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.45s ease, opacity 0.45s ease;
 }
 
 .ticket {
