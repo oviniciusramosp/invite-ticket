@@ -254,8 +254,8 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   perspective-origin: 50% 50%;
   width: var(--ticket-w);
   max-width: 100%;
-  /* room for the circle that is slightly taller than the ticket */
-  padding-block: calc((var(--ambient-d) - var(--ticket-h)) / 2);
+  /* Glow circle may extend outside; don't pad content for it */
+  overflow: visible;
 }
 
 /* Perfect circle glow behind the ticket (not an oval) */
