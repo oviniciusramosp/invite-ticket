@@ -438,8 +438,9 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   Adapted from simeydotme/pokemon-cards-css → amazing-rare.css
   (https://poke-holo.simey.me/#⚓-amazing)
 
-  Spotlight uses farthest-corner + --pointer-x/y so the hot spot
-  tracks the cursor. Texture tiles also shift with the pointer.
+  No black in spotlight/glare layers — only white (and transparent)
+  so blend modes never burn a dark ring into the art.
+  Rainbow sunpillar is a repeating-linear at --angle (not black).
 */
 .ticket__shine {
   position: absolute;
@@ -455,10 +456,10 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     var(--glitter),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
-      hsla(150, 20%, 10%, 1) 8%,
-      hsla(177, 22%, 80%, 0.15) 42%,
-      hsla(0, 0%, 95%, 0.98) 85%,
-      hsla(0, 0%, 95%, 0.98) 100%
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.45) 28%,
+      rgba(255, 255, 255, 0.12) 55%,
+      rgba(255, 255, 255, 0) 100%
     );
 
   background-size:
@@ -472,12 +473,12 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
       calc(var(--pointer-from-top) * 35% + var(--glitter-offset) * 0.8),
     0 0;
   background-repeat: repeat, repeat, no-repeat;
-  background-blend-mode: soft-light, color-burn;
-  filter: brightness(1) contrast(1) saturate(0.9);
-  mix-blend-mode: color-dodge;
+  background-blend-mode: soft-light, soft-light;
+  filter: brightness(1.05) contrast(1.05) saturate(1);
+  mix-blend-mode: soft-light;
 }
 
-/* Etched foil + warm spotlight (this is the main cursor-following flash) */
+/* Etched foil + white spotlight (cursor-following flash, no black) */
 .ticket__shine::before {
   content: "";
   position: absolute;
@@ -495,10 +496,10 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     var(--foil),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
-      hsla(50, 20%, 92%, 0.95) 6%,
-      rgba(181, 139, 164, 0.5) 38%,
-      hsla(0, 0%, 8%, 0.55) 72%,
-      hsl(0, 0%, 0%) 100%
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.35) 32%,
+      rgba(255, 255, 255, 0.08) 58%,
+      rgba(255, 255, 255, 0) 100%
     );
 
   background-size: var(--foilsize) var(--foilsize), 100% 100%;
@@ -506,13 +507,13 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     calc(var(--pointer-from-left) * 25%) calc(var(--pointer-from-top) * 25%),
     0 0;
   background-repeat: repeat, no-repeat;
-  background-blend-mode: color-burn;
-  mix-blend-mode: lighten;
-  filter: brightness(1) contrast(1.05) saturate(1);
-  opacity: 0.55;
+  background-blend-mode: soft-light;
+  mix-blend-mode: soft-light;
+  filter: brightness(1.08) contrast(1.05) saturate(1.05);
+  opacity: 0.65;
 }
 
-/* Sunpillar rainbow (saturation) — follows background pointer */
+/* Sunpillar rainbow (saturation) — angled linear bars, no black */
 .ticket__shine::after {
   content: "";
   position: absolute;
@@ -541,21 +542,25 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   background-position:
     calc(50% + (50% - var(--background-x)) * 3)
     calc(50% + (50% - var(--background-y)) * 3);
-  filter: brightness(calc(0.72 - (var(--pointer-from-center) * 0.45))) contrast(1) saturate(1.05);
-  mix-blend-mode: saturation;
+  filter: brightness(calc(0.85 - (var(--pointer-from-center) * 0.25))) contrast(1) saturate(1.1);
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
 }
 
 /* Slightly softer on the back (dense text) */
 .ticket__shine--subtle {
   opacity: calc(var(--card-opacity) * 0.72);
-  filter: brightness(0.95) contrast(1) saturate(0.8);
+  filter: brightness(1) contrast(1) saturate(0.95);
 }
 
 .ticket__shine--subtle::before {
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
-/* ─── Amazing Rare glare (tracks pointer) ────────────────── */
+/*
+  Glare: white only (full → transparent). Never black.
+  soft-light/screen avoid darkening the art.
+*/
 .ticket__glare {
   position: absolute;
   inset: 0;
@@ -566,14 +571,14 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(50, 25%, 95%, 0.7) 0%,
-    hsla(150, 18%, 40%, 0.35) 35%,
-    hsla(0, 0%, 5%, 0.55) 78%,
-    hsla(0, 0%, 0%, 0.7) 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    rgba(255, 255, 255, 0.4) 28%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 255, 255, 0) 78%
   );
 
-  filter: brightness(0.9) contrast(1.65);
-  mix-blend-mode: overlay;
+  filter: none;
+  mix-blend-mode: soft-light;
 }
 
 .ticket__glare::after {
@@ -583,15 +588,15 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
   background-image: radial-gradient(
     farthest-corner circle at var(--pointer-x) var(--pointer-y),
-    hsla(50, 30%, 98%, 0.9) 0%,
-    hsla(150, 20%, 45%, 0.4) 32%,
-    hsla(0, 0%, 0%, 0.2) 68%,
-    transparent 100%
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.35) 22%,
+    rgba(255, 255, 255, 0.08) 48%,
+    rgba(255, 255, 255, 0) 70%
   );
 
-  filter: brightness(1) contrast(1.35);
-  mix-blend-mode: overlay;
-  opacity: 1;
+  filter: none;
+  mix-blend-mode: screen;
+  opacity: 0.85;
 }
 
 /* ─── Idle float (subtle, stops while interacting) ───────── */
