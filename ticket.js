@@ -44,18 +44,35 @@ function setCss() {
     1
   );
 
-  ticket.style.setProperty("--pointer-x", `${state.gx}%`);
-  ticket.style.setProperty("--pointer-y", `${state.gy}%`);
+  // Pointer vars drive radial gradients — must stay in sync with the cursor
+  ticket.style.setProperty("--pointer-x", `${round(state.gx, 2)}%`);
+  ticket.style.setProperty("--pointer-y", `${round(state.gy, 2)}%`);
   ticket.style.setProperty("--pointer-from-center", String(round(fromCenter, 3)));
   ticket.style.setProperty("--pointer-from-top", String(round(state.gy / 100, 3)));
   ticket.style.setProperty("--pointer-from-left", String(round(state.gx / 100, 3)));
-  ticket.style.setProperty("--background-x", `${state.bx}%`);
-  ticket.style.setProperty("--background-y", `${state.by}%`);
+  ticket.style.setProperty("--background-x", `${round(state.bx, 2)}%`);
+  ticket.style.setProperty("--background-y", `${round(state.by, 2)}%`);
   ticket.style.setProperty("--rotate-x", `${round(state.rx, 2)}deg`);
   ticket.style.setProperty("--rotate-y", `${round(state.ry, 2)}deg`);
   ticket.style.setProperty("--card-opacity", String(round(state.o, 3)));
   ticket.style.setProperty("--card-scale", String(round(state.scale, 3)));
   ticket.style.setProperty("--flip", flipped ? "180deg" : "0deg");
+}
+
+/** Write pointer immediately (no lerp lag) so shine sticks to the cursor */
+function setPointerCss(gx, gy, bx, by) {
+  const fromCenter = clamp(
+    Math.sqrt((gy - 50) ** 2 + (gx - 50) ** 2) / 50,
+    0,
+    1
+  );
+  ticket.style.setProperty("--pointer-x", `${round(gx, 2)}%`);
+  ticket.style.setProperty("--pointer-y", `${round(gy, 2)}%`);
+  ticket.style.setProperty("--pointer-from-center", String(round(fromCenter, 3)));
+  ticket.style.setProperty("--pointer-from-top", String(round(gy / 100, 3)));
+  ticket.style.setProperty("--pointer-from-left", String(round(gx / 100, 3)));
+  ticket.style.setProperty("--background-x", `${round(bx, 2)}%`);
+  ticket.style.setProperty("--background-y", `${round(by, 2)}%`);
 }
 
 function lerp(a, b, t) {
@@ -67,16 +84,18 @@ function tick(ts) {
   const dt = Math.min((ts - lastTs) / 16.67, 2.5);
   lastTs = ts;
 
-  // Snappier while interacting, softer when releasing / idle
-  const k = interacting ? 0.18 : 0.08;
+  // Tilt/opacity ease; pointer snaps hard while interacting (see setPointerCss)
+  const k = interacting ? 0.22 : 0.08;
   const t = 1 - Math.pow(1 - k, dt);
+  const pk = interacting ? 0.55 : 0.1;
+  const pt = 1 - Math.pow(1 - pk, dt);
 
   state.rx = lerp(state.rx, target.rx, t);
   state.ry = lerp(state.ry, target.ry, t);
-  state.gx = lerp(state.gx, target.gx, t);
-  state.gy = lerp(state.gy, target.gy, t);
-  state.bx = lerp(state.bx, target.bx, t);
-  state.by = lerp(state.by, target.by, t);
+  state.gx = lerp(state.gx, target.gx, pt);
+  state.gy = lerp(state.gy, target.gy, pt);
+  state.bx = lerp(state.bx, target.bx, pt);
+  state.by = lerp(state.by, target.by, pt);
   state.o = lerp(state.o, target.o, t);
   state.scale = lerp(state.scale, target.scale, t);
 
@@ -162,24 +181,37 @@ function stopIdle() {
 
 function interactFromEvent(e) {
   const point = e.touches ? e.touches[0] : e;
+  // Ticket AABB (same approach as poke-holo); works with mild 3D tilt
   const rect = ticket.getBoundingClientRect();
   const absX = point.clientX - rect.left;
   const absY = point.clientY - rect.top;
   const pct = {
-    x: clamp(round((100 / rect.width) * absX)),
-    y: clamp(round((100 / rect.height) * absY)),
+    x: clamp(round((100 / Math.max(rect.width, 1)) * absX, 2)),
+    y: clamp(round((100 / Math.max(rect.height, 1)) * absY, 2)),
   };
   const center = { x: pct.x - 50, y: pct.y - 50 };
 
+  const bx = adjust(pct.x, 0, 100, 30, 70);
+  const by = adjust(pct.y, 0, 100, 30, 70);
+
   // Landscape ticket: slightly stronger horizontal tilt feels better
-  target.rx = round(-(center.x / 3.2));
-  target.ry = round(center.y / 4);
+  target.rx = round(-(center.x / 3.2), 2);
+  target.ry = round(center.y / 4, 2);
   target.gx = pct.x;
   target.gy = pct.y;
-  target.bx = adjust(pct.x, 0, 100, 36, 64);
-  target.by = adjust(pct.y, 0, 100, 34, 66);
+  target.bx = bx;
+  target.by = by;
   target.o = 1;
   target.scale = 1.04;
+
+  // Instant pointer for shine (tilt still eases via RAF)
+  state.gx = pct.x;
+  state.gy = pct.y;
+  state.bx = bx;
+  state.by = by;
+  state.o = Math.max(state.o, 0.85);
+  setPointerCss(pct.x, pct.y, bx, by);
+  ticket.style.setProperty("--card-opacity", String(round(state.o, 3)));
 
   ensureLoop();
 }
