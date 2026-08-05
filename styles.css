@@ -466,11 +466,14 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     var(--glittersize) var(--glittersize),
     var(--glittersize) var(--glittersize),
     100% 100%;
-  /* Glitter shifts with cursor so grain isn’t a static full-card sheet */
+  /*
+    Paper grain is locked to the ticket (fixed position).
+    Only the white radial “light” follows the cursor — if the texture
+    also panned, it looked like a floating overlay, not paper.
+  */
   background-position:
-    calc(var(--pointer-from-left) * 45%) calc(var(--pointer-from-top) * 45%),
-    calc(var(--pointer-from-left) * -30% + var(--glitter-offset))
-      calc(var(--pointer-from-top) * 35% + var(--glitter-offset) * 0.8),
+    0 0,
+    var(--glitter-offset) calc(var(--glitter-offset) * 0.8),
     0 0;
   background-repeat: repeat, repeat, no-repeat;
   background-blend-mode: soft-light, soft-light;
@@ -478,7 +481,7 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   mix-blend-mode: soft-light;
 }
 
-/* Etched foil + white spotlight (cursor-following flash, no black) */
+/* Etched foil (static paper) + white spotlight (follows cursor) */
 .ticket__shine::before {
   content: "";
   position: absolute;
@@ -503,9 +506,7 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     );
 
   background-size: var(--foilsize) var(--foilsize), 100% 100%;
-  background-position:
-    calc(var(--pointer-from-left) * 25%) calc(var(--pointer-from-top) * 25%),
-    0 0;
+  background-position: center center, 0 0;
   background-repeat: repeat, no-repeat;
   background-blend-mode: soft-light;
   mix-blend-mode: soft-light;
