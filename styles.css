@@ -39,13 +39,20 @@
 
   /* Amazing Rare foil (poke-holo #⚓-amazing) */
   --glitter: url("assets/foils/glitter.png");
-  /* Fixed px: % of a wide ticket makes tiles huge; paper foil is fine-grain */
-  --glittersize: 42px;
+  /*
+    Texture tiles scale with viewport so mobile keeps readable grain.
+    Floor avoids sub-pixel mush on narrow screens; cap keeps desktop fine.
+  */
+  --glittersize: clamp(52px, 12vw, 68px);
   --foil: url("assets/foils/illusion.png");
-  --foilsize: 90px;
+  --foilsize: clamp(104px, 24vw, 140px);
+  --glitter-offset: clamp(18px, 4.5vw, 28px);
   --grain: url("assets/foils/grain.webp");
   --space: 5%;
   --angle: 133deg;
+  /* Idle float amplitude (stronger on small screens via media query) */
+  --float-y: 6px;
+  --float-duration: 5.5s;
 
   /* Sunpillar rainbow (base.css) */
   --sunpillar-1: hsl(2, 100%, 73%);
@@ -472,7 +479,10 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     var(--glittersize) var(--glittersize),
     var(--glittersize) var(--glittersize),
     100% 100%;
-  background-position: 0 0, 21px 17px, center center;
+  background-position:
+    0 0,
+    var(--glitter-offset) calc(var(--glitter-offset) * 0.8),
+    center center;
   background-repeat: repeat, repeat, no-repeat;
   background-blend-mode: soft-light, color-burn;
   filter: brightness(1) contrast(1) saturate(0.9);
@@ -609,12 +619,12 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-6px);
+    transform: translateY(calc(var(--float-y) * -1));
   }
 }
 
 .ticket:not(.is-interacting):not(.is-flipping) {
-  animation: idle-float 5.5s ease-in-out infinite;
+  animation: idle-float var(--float-duration) ease-in-out infinite;
 }
 
 /* Reduced motion */
@@ -627,9 +637,27 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   }
 }
 
-/* Mobile: slightly stronger default opacity when touching */
+/* Mobile / narrow viewports */
+@media (max-width: 640px) {
+  :root {
+    /* Larger foil grain relative to the smaller card */
+    --glittersize: clamp(56px, 15vw, 72px);
+    --foilsize: clamp(112px, 30vw, 148px);
+    --glitter-offset: clamp(20px, 5.5vw, 32px);
+    /* More prominent float */
+    --float-y: 14px;
+    --float-duration: 4.2s;
+  }
+}
+
+/* Touch: slightly stronger default holo when not hovering with a mouse */
 @media (hover: none) {
   .ticket {
     --card-opacity: 0.55;
+  }
+
+  :root {
+    --float-y: 16px;
+    --float-duration: 4s;
   }
 }
