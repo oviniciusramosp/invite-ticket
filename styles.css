@@ -379,24 +379,24 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
 .ticket__front {
   transform: translateZ(1px);
-  --face-art: url("assets/frente.svg");
-  --foil-mask: url("assets/frente.svg");
+  --face-art: url("assets/frente.svg?v=5");
+  --foil-mask: url("assets/frente.svg?v=5");
 }
 
 .ticket__back {
   transform: rotateY(180deg) translateZ(1px);
-  --face-art: url("assets/verso.svg");
-  --foil-mask: url("assets/verso.svg");
+  --face-art: url("assets/verso.svg?v=5");
+  --foil-mask: url("assets/verso.svg?v=5");
 }
 
 .ticket[data-mode="orange"] .ticket__front {
-  --face-art: url("assets/orange-frente.svg");
-  --foil-mask: url("assets/orange-frente.svg");
+  --face-art: url("assets/orange-frente.svg?v=5");
+  --foil-mask: url("assets/orange-frente.svg?v=5");
 }
 
 .ticket[data-mode="orange"] .ticket__back {
-  --face-art: url("assets/orange-verso.svg");
-  --foil-mask: url("assets/orange-verso.svg");
+  --face-art: url("assets/orange-verso.svg?v=5");
+  --foil-mask: url("assets/orange-verso.svg?v=5");
 }
 
 /*

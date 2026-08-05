@@ -307,14 +307,14 @@ ticket.addEventListener(
 /* ─── Golden ↔ Orange mode ───────────────────────────────── */
 const ART = {
   golden: {
-    front: "assets/frente.svg?v=4",
-    back: "assets/verso.svg?v=4",
+    front: "assets/frente.svg?v=5",
+    back: "assets/verso.svg?v=5",
     label: "Golden ticket",
     nextHint: "Trocar para orange",
   },
   orange: {
-    front: "assets/orange-frente.svg?v=4",
-    back: "assets/orange-verso.svg?v=4",
+    front: "assets/orange-frente.svg?v=5",
+    back: "assets/orange-verso.svg?v=5",
     label: "Orange ticket",
     nextHint: "Trocar para golden",
   },
