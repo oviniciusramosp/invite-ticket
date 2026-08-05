@@ -404,8 +404,8 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   Single aligned tile; large tile + strong blend so digits stay readable.
 */
 .ticket[data-mode="orange"] {
-  --btc-binary: url("assets/foils/btc-genesis-binary.png?v=3");
-  --btc-tilesize: min(420px, 58vw);
+  --btc-binary: url("assets/foils/btc-genesis-binary.png?v=4");
+  --btc-tilesize: min(168px, 24vw);
 }
 
 .ticket__art {
