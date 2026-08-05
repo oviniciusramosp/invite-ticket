@@ -1,0 +1,4 @@
+Binary texture derived from the first Bitcoin peer-to-peer transaction
+(Satoshi Nakamoto → Hal Finney, block 170, 10 BTC).
+Tx raw length: 275 bytes. Bits tiled as 0/1 glyphs.
+Also references the genesis block newspaper headline era (Jan 2009).

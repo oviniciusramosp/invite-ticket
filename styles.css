@@ -399,6 +399,17 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
   --foil-mask: url("assets/orange-verso.svg");
 }
 
+/*
+  Orange mode foil = binary of the first Bitcoin P2P tx
+  (Satoshi → Hal Finney, block 170). Tiles a bit larger so 0/1 stay readable.
+*/
+.ticket[data-mode="orange"] {
+  --foil: url("assets/foils/btc-genesis-binary.png");
+  --glitter: url("assets/foils/btc-genesis-binary.png");
+  --glittersize: 72px;
+  --imgsize: 110px;
+}
+
 .ticket__art {
   display: block;
   object-fit: fill;
