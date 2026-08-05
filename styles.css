@@ -401,12 +401,11 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
 /*
   Orange mode: first Bitcoin P2P tx binary (Satoshi → Hal Finney).
-  Single aligned tile layer only — stacking binary as dual glitter + foil
-  + ::after caused visible 0/1 overlaps at different offsets.
+  Single aligned tile; large tile + strong blend so digits stay readable.
 */
 .ticket[data-mode="orange"] {
-  --btc-binary: url("assets/foils/btc-genesis-binary.png?v=2");
-  --btc-tilesize: 220px;
+  --btc-binary: url("assets/foils/btc-genesis-binary.png?v=3");
+  --btc-tilesize: min(420px, 58vw);
 }
 
 .ticket__art {
@@ -541,8 +540,8 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 }
 
 /*
-  Orange shine: one binary paper layer (repeat from 0,0 — no dual offsets),
-  then conic + radial holo. Glitter sparkle stays off so digits don’t double.
+  Orange shine: binary is the dominant paper layer (hard-light so it pops),
+  then lighter conic/radial holo on top. Single tile origin = no overlap.
 */
 .ticket[data-mode="orange"] .ticket__shine {
   background-image:
@@ -556,31 +555,35 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
     ),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
-      hsla(150, 0%, 0%, 0.98) 10%,
-      hsla(0, 0%, 95%, 0.15) 90%
+      hsla(150, 0%, 0%, 0.9) 10%,
+      hsla(0, 0%, 95%, 0.2) 90%
     );
   background-size: var(--btc-tilesize) var(--btc-tilesize), cover, cover;
   background-position: 0 0, center center, center center;
   background-repeat: repeat, no-repeat, no-repeat;
-  background-blend-mode: soft-light, overlay;
+  /* hard-light keeps 0/1 readable; overlay was washing them out */
+  background-blend-mode: hard-light, soft-light;
+  filter: brightness(calc(0.55 + (var(--pointer-from-center) * 0.25))) contrast(1.15) saturate(1.8);
 }
 
-/* Warm wash + spotlight only (no second binary foil) */
+/* Soft warm tint + spotlight — low opacity so binary stays on top visually */
 .ticket[data-mode="orange"] .ticket__shine::before {
   background-image:
     linear-gradient(45deg, hsl(28, 95%, 48%), hsl(36, 100%, 58%)),
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),
-      hsla(30, 30%, 92%, 0.95) 10%,
-      hsl(0, 0%, 0%) 70%
+      hsla(30, 30%, 95%, 0.9) 8%,
+      hsla(0, 0%, 0%, 0.85) 75%
     );
   background-size: cover, cover;
   background-position: center center, center center;
   background-blend-mode: multiply;
-  opacity: 0.55;
+  mix-blend-mode: soft-light;
+  filter: brightness(1.1) contrast(1.1) saturate(0.8);
+  opacity: 0.4;
 }
 
-/* Kill micro-shifted third binary/glitter layer on orange */
+/* No extra glitter layer on orange */
 .ticket[data-mode="orange"] .ticket__shine::after {
   display: none;
 }
