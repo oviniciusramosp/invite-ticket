@@ -43,9 +43,9 @@
     % of the ticket box (same model as pokemon-cards-css).
     Desktop: finer grain; mobile bumps these up in the media query below.
   */
-  --glittersize: 8%;
+  --glittersize: 4%;
   --foil: url("assets/foils/geometric.png");
-  --imgsize: 14%;
+  --imgsize: 7%;
   --shift: 1px;
   --grain: url("assets/foils/grain.webp");
   --space: 5%;
@@ -623,8 +623,8 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 @media (max-width: 640px) {
   :root {
     /* Slightly coarser % grain on small screens (still relative to card) */
-    --glittersize: 18%;
-    --imgsize: 28%;
+    --glittersize: 9%;
+    --imgsize: 14%;
     /* More prominent float */
     --float-y: 14px;
     --float-duration: 4.2s;
