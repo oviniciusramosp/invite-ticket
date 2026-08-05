@@ -406,8 +406,8 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 .ticket[data-mode="orange"] {
   --foil: url("assets/foils/btc-genesis-binary.png?v=2");
   --glitter: url("assets/foils/btc-genesis-binary.png?v=2");
-  --glittersize: 160px;
-  --imgsize: 200px;
+  --glittersize: 280px;
+  --imgsize: 340px;
 }
 
 .ticket__art {
