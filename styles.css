@@ -44,9 +44,9 @@
     (A local --imgsize on .ticket__shine was overriding root % and
     made previous tweaks look like no-ops.)
   */
-  --glittersize: 16px;
+  --glittersize: 36px;
   --foil: url("assets/foils/geometric.png");
-  --imgsize: 28px;
+  --imgsize: 64px;
   --shift: 1px;
   --grain: url("assets/foils/grain.webp");
   --space: 5%;
@@ -622,9 +622,9 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 /* Mobile / narrow viewports */
 @media (max-width: 640px) {
   :root {
-    /* Larger tiles so grain stays readable on small tickets */
-    --glittersize: 28px;
-    --imgsize: 48px;
+    /* Slightly larger tiles on small tickets */
+    --glittersize: 40px;
+    --imgsize: 72px;
     /* More prominent float */
     --float-y: 14px;
     --float-duration: 4.2s;
