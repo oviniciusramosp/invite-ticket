@@ -401,13 +401,13 @@ body[data-ticket-mode="orange"] .footer-hint.is-flipped {
 
 /*
   Orange mode foil = binary of the first Bitcoin P2P tx
-  (Satoshi → Hal Finney, block 170). Tiles a bit larger so 0/1 stay readable.
+  (Satoshi → Hal Finney, block 170). Large tiles so 0/1 stay legible under blend.
 */
 .ticket[data-mode="orange"] {
-  --foil: url("assets/foils/btc-genesis-binary.png");
-  --glitter: url("assets/foils/btc-genesis-binary.png");
-  --glittersize: 72px;
-  --imgsize: 110px;
+  --foil: url("assets/foils/btc-genesis-binary.png?v=2");
+  --glitter: url("assets/foils/btc-genesis-binary.png?v=2");
+  --glittersize: 160px;
+  --imgsize: 200px;
 }
 
 .ticket__art {
